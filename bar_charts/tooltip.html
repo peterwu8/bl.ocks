@@ -92,6 +92,8 @@ var svg = d3.select("body").append("svg")
 svg.call(tip);
 
 var max_frequency = 0;
+var first_letter = "";
+var last_letter = "";
 
 d3.tsv("data/tooltip.tsv", type, function(error, data) {
   x.domain(data.map(function(d) { return d.letter; }));
@@ -117,13 +119,20 @@ d3.tsv("data/tooltip.tsv", type, function(error, data) {
     .enter().append("rect")
       .attr("class", "bar")
       .attr("x", function(d) {
+        var mycomment = "";
+        if (d.letter == last_letter) {
+            mycomment = "(Last letter) ";
+        }
         if (d.comment != "") {
-            commentAnnotation(d.letter, d.comment);
+            mycomment += d.letter+": "+d.comment;
+        }
+        if (mycomment != "") {
+            commentAnnotation(d.letter, mycomment);
         }
         return x(d.letter); })
       .attr("width", x.rangeBand())
       .attr("y", function(d) {
-         console.log("max:"+max_frequency+", "+d.frequency+" = "+y(d.frequency))
+         console.log("last:"+last_letter+", first:"+first_letter+", max:"+max_frequency+", "+d.frequency+" = "+y(d.frequency))
         return y(d.frequency); })
       .attr("height", function(d) { return height - y(d.frequency); })
       .on('mouseover', tip.show)
@@ -154,6 +163,10 @@ function type(d) {
   if (max_frequency < d.frequency) {
     max_frequency = d.frequency;
   }
+  if (first_letter == "") {
+    first_letter = d.letter;
+  }
+  last_letter = d.letter;
   return d;
 }
 
